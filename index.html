@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!-- <script src="vue.js" type="text/javascript" charset="UTF-8"></script> -->
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<div style="border: solid;margin-top: 10px;">
+				<h1>模板语法-插值</h1>
+				{{msg}}
+				<span v-once>{{msg}}</span>
+				<p>Using mustaches: {{rawhtml}}</p>
+				<p>Using v-html directive: <span v-html="rawhtml"></span></p>
+				<p v-text="rawhtml"></p>
+				<div v-bind:class = "color">test...</div>
+				{{number+1}}
+				{{ok ? "Yse":"No"}}
+				{{msg.split('').reverse().join('')}}
+			</div>
+			<div style="border: solid;margin-top: 10px;background-color: antiquewhite;">
+				<h1>模板语法-指令</h1>
+				<p v-if="seem">You can see me now</p>
+				<a v-bind:href="url">baidu</a>
+				<div v-on:click="click1">
+					<div v-on:click.stop="click2">
+						click me
+					</div>
+				</div>
+			</div>
+			<div style="border: solid;margin-top: 10px;">
+				<h1>class与style绑定</h1>
+				<div v-bind:class="{active : isActive,bigfont : isActive}">对象形式</div>
+				<div v-bind:class="['green',isActive ? 'bigfont': '']">数组形式</div>
+				<div v-bind:style="styleObject">内联样式</div>
+				<div v-bind:style="[styleObject,styleObject2]">内联样式2</div>
+			</div>
+			<div style="border: solid;margin-top: 10px;background-color: antiquewhite;">
+				<h1>条件渲染</h1>
+				<div v-if="type === 'A'">A</div>
+				<div v-else-if="type === 'B'">B</div>
+				<div v-else-if="type === 'C'">C</div>
+				<div v-else>Not ABC</div>
+				<div v-show="ok">show</div>
+			</div>
+			<div style="border: solid;margin-top: 10px;">
+				<h1>列表渲染</h1>
+				<ul>
+					<li v-for="item,index of items">{{index}} {{item.message}}</li>
+				</ul>
+				<ul>
+					<li v-for="value,key,index in object" :key="key">{{index}} {{key}}:{{value}}</li>
+				</ul>
+			</div>
+			<div style="border: solid;margin-top: 10px;background-color: antiquewhite;">
+				<h1>事件绑定</h1>
+				<button @click="number++">{{number}}</button>
+				<button @click="sayHi('Hi',$event)">sayhi</button>
+			</div>
+			<div style="border: solid;margin-top: 10px;">
+				<h1>表单输入绑定</h1>
+				<input type="text" v-model="msg"/>
+				<p>输入信息：{{msg}}</p>
+				<textarea v-model="msg"></textarea>
+				<div>
+					<input type="checkbox" id="jack" value="jack" v-model="checkedNames"/>
+					<label for="jack">Jack</label>
+					<input type="checkbox" id="tom" value="tom" v-model="checkedNames"/>
+					<label for="tom">tom</label>
+					<input type="checkbox" id="mike" value="mike" v-model="checkedNames"/>
+					<label for="mike">mike</label>
+					<p>复选框选中项：{{checkedNames}}</p>
+				</div>
+				<div>
+					<input type="radio" id="jack" value="jack" v-model="radioName"/>
+					<label for="jack">Jack</label>
+					<input type="radio" id="tom" value="tom" v-model="radioName"/>
+					<label for="tom">tom</label>
+					<input type="radio" id="mike" value="mike" v-model="radioName"/>
+					<label for="mike">mike</label>
+					<p>复选框选中项：{{radioName}}</p>
+				</div>
+				<button @click="submit">提交</button>
+			</div>
+			<div style="border: solid;margin-top: 10px;background-color: antiquewhite;">
+				<h1>组件基础</h1>
+				<div>
+					<p>总共点击了{{totalClickTimes}}次,</p>
+					<button-counter @click-time="totalClick" title="按钮1"></button-counter>
+					<button-counter @click-time="totalClick" title="按钮2"></button-counter>
+				</div>
+				<blog-post v-for="item,index in blogs" :key="index" :dfd="item" >
+					<h2>h2....</h2>
+				</blog-post>
+			</div>
+		</div>
+		<script type="text/javascript">
+			// 定义一个名为 button-counter 的新组件，全局注册
+			Vue.component('button-counter', {
+				props:["title"],
+				data: function () {
+					return {
+						count: 0,
+					}
+				},
+				methods:{
+					clickTimes(e){
+						this.count++
+						// console.log(e)
+						this.$emit("click-time",this.title)
+					},
+				},
+				template: '<div><h3>{{title}}</h3><button v-on:click="clickTimes($event)">You clicked me {{ count }} times.</button></div>'
+			})
+			// 定义一个博客组件
+			var blogPost = {
+				props:["dfd"],
+				data:function(){
+					return {
+						postFontSize: 10,
+					}
+				},
+				methods:{
+					enlargeFont(){
+						this.postFontSize++
+					}
+				},
+				template:`
+					<div :style="{fontSize:postFontSize+'px'}">
+						<h1>{{dfd.title}}</h1>
+						 <slot></slot>
+						<button @click="enlargeFont">扩大字体</button>
+						<p v-html='dfd.content'></p>
+					</div>`
+			}
+			
+			var vm = new Vue({
+				el: '#app',
+				components:{
+					// 局部注册
+					"blog-post":blogPost
+				},
+				data: {
+					msg: "Hello Vue !",
+					rawhtml:"<span style='color:red'>This should be red</span>",
+					color:"red",
+					number:1,
+					ok: true,
+					seem: true,
+					url:"https://www.baidu.com",
+					isActive:true,
+					styleObject:{
+						color:'red',
+						fontSize:'20px'
+					},
+					styleObject2:{
+						background: 'yellow'
+					},
+					type: 'B',
+					items:[
+						{ message: 'Foo' },
+						{ message: 'Bar' }
+					],
+					object:{
+						name: 'heyyou',
+						age: 20,
+						sex: 'male'
+					},
+					checkedNames:[],
+					radioName:"",
+					blogs:[
+						{title:"blog1",content:"。。。blogggg1。。。"},
+						{title:"blog2",content:"。。。blogggg2。。。"},
+						{title:"blog3",content:"。。。blogggg3。。。"},
+					],
+					totalClickTimes:0,
+					
+				},
+				
+				methods:{
+					click1(){
+						console.log("click1")
+					},
+					click2(){
+						console.log("click2")
+					},
+					sayHi(str,e){
+						// console.log(e);
+						alert(str+this.object.name);
+					},
+					submit(){
+						console.log(this.msg);
+						console.log(this.checkedNames);
+						console.log(this.radioName)
+					},
+					totalClick(buttontitle){
+						this.totalClickTimes++
+						console.log("这次是"+buttontitle+"点击的")
+					},
+					
+				},
+				// 初始化了一个vue空实例，只有一些生命周期函数和默认事件，但是data和methods还未初始化
+				beforeCreate() {
+					console.log("beforeCreate")
+				},
+				// data和methods初始化好了，操作data或者调用methods最早只能在这个阶段
+				created() {
+					console.log("created")
+				},
+				// 在内存中编译好了模板，尚未挂载到页面上
+				beforeMount() {
+					console.log("beforeMount")
+				},
+				// 模板已挂载到页面，整个vue实例初始化完成
+				mounted() {
+					console.log("mounted")
+				},
+				// 数据已更新，但是页面还是旧的，数据和页面不同步
+				beforeUpdate() {
+					console.log("beforeUpdate")
+				},
+				// 页面也更新到最新，数据和页面同步
+				updated() {
+					console.log("updated")
+				}
+			})
+			setTimeout(function(){
+				vm.msg = "change ....."
+				vm.color = "blue"
+			},3000)
+			// vm.b =123
+			vm.$watch('msg',function(newValue,oldValue){
+				console.log(newValue,oldValue)
+			})
+			vm.msg = 'test1'
+			// vm.items.unshift({message:'hhhh'})
+			vm.items = vm.items.filter(function (item) {
+			  return item.message.match(/Bar/)
+			})
+			
+		</script>
+		<style type="text/css">
+			.red{
+				color: red;
+			}
+			.blue{
+				color: blue;
+			}
+			.active{
+				width: 12.5rem;
+				height: 12.5rem;
+				background-color: #FF0000;
+			}
+			.green{
+				width: 12.5rem;
+				height: 12.5rem;
+				background-color: green;
+			}
+			.bigfont{
+				font-size: 30px;
+			}
+		</style>
+	</body>
+</html>
